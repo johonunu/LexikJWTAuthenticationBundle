@@ -2,7 +2,7 @@
 
 namespace Lexik\Bundle\JWTAuthenticationBundle\Tests\Services;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Services\OpenSSLKeyLoader;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\OpenSSLKeyLoader;
 
 /**
  * OpenSSLKeyLoaderTest

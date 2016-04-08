@@ -5,11 +5,13 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="lexik_jwt_authentication.jwt_encoder.class">Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoder</parameter>
+        <parameter key="lexik_jwt_authentication.encoder.jose.open_ssl.class">Lexik\Bundle\JWTAuthenticationBundle\Encoder\JOSE\OpenSSLEncoder</parameter>
+        <parameter key="lexik_jwt_authentication.encoder.jose.sec_lib.class">Lexik\Bundle\JWTAuthenticationBundle\Encoder\JOSE\SecLibEncoder</parameter>
         <parameter key="lexik_jwt_authentication.jwt_manager.class">Lexik\Bundle\JWTAuthenticationBundle\Services\JWTManager</parameter>
         <parameter key="lexik_jwt_authentication.handler.authentication_success.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler</parameter>
         <parameter key="lexik_jwt_authentication.handler.authentication_failure.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler</parameter>
-        <parameter key="lexik_jwt_authentication.openssl_key_loader.class">Lexik\Bundle\JWTAuthenticationBundle\Services\OpenSSLKeyLoader</parameter>
+        <parameter key="lexik_jwt_authentication.key_loader.open_ssl.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\OpenSSLKeyLoader</parameter>
+        <parameter key="lexik_jwt_authentication.key_loader.sec_lib.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\SecLibKeyLoader</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.provider.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Authentication\Provider\JWTProvider</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.listener.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Firewall\JWTListener</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.entry_point.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Http\EntryPoint\JWTEntryPoint</parameter>
@@ -19,9 +21,15 @@
     </parameters>
 
     <services>
-        <!-- JWT Encoder / Decoder / Default implementation -->
-        <service id="lexik_jwt_authentication.jwt_encoder" class="%lexik_jwt_authentication.jwt_encoder.class%">
-            <argument type="service" id="lexik_jwt_authentication.openssl_key_loader"/>
+        <!-- JOSE OpenSSL JWT Encoder / Decoder / Default implementation -->
+        <service id="lexik_jwt_authentication.encoder.jose.open_ssl" class="%lexik_jwt_authentication.encoder.jose.open_ssl.class%">
+            <argument type="service" id="lexik_jwt_authentication.key_loader.open_ssl"/>
+            <argument>%lexik_jwt_authentication.encoder_algorithm%</argument>
+        </service>
+        <!-- JOSE SecLib JWT Encoder / Decoder -->
+        <service id="lexik_jwt_authentication.encoder.jose.sec_lib" class="%lexik_jwt_authentication.encoder.jose.sec_lib.class%">
+            <argument type="service" id="lexik_jwt_authentication.key_loader.sec_lib"/>
+            <argument>%lexik_jwt_authentication.encoder_algorithm%</argument>
         </service>
         <!-- JWT Manager / Default implementation -->
         <service id="lexik_jwt_authentication.jwt_manager" class="%lexik_jwt_authentication.jwt_manager.class%">
@@ -43,10 +51,16 @@
             <argument type="service" id="event_dispatcher"/>
         </service>
         <!-- OpenSSL Key Loader -->
-        <service id="lexik_jwt_authentication.openssl_key_loader" class="%lexik_jwt_authentication.openssl_key_loader.class%">
-          <argument>%lexik_jwt_authentication.private_key_path%</argument>
-          <argument>%lexik_jwt_authentication.public_key_path%</argument>
-          <argument>%lexik_jwt_authentication.pass_phrase%</argument>
+        <service id="lexik_jwt_authentication.key_loader.open_ssl" class="%lexik_jwt_authentication.key_loader.open_ssl.class%">
+            <argument>%lexik_jwt_authentication.private_key_path%</argument>
+            <argument>%lexik_jwt_authentication.public_key_path%</argument>
+            <argument>%lexik_jwt_authentication.pass_phrase%</argument>
+        </service>
+        <!-- SecLib Key Loader -->
+        <service id="lexik_jwt_authentication.key_loader.sec_lib" class="%lexik_jwt_authentication.key_loader.sec_lib.class%">
+            <argument>%lexik_jwt_authentication.private_key_path%</argument>
+            <argument>%lexik_jwt_authentication.public_key_path%</argument>
+            <argument>%lexik_jwt_authentication.pass_phrase%</argument>
         </service>
         <!-- JWT Security Authentication Provider -->
         <service id="lexik_jwt_authentication.security.authentication.provider" class="%lexik_jwt_authentication.security.authentication.provider.class%" public="false">

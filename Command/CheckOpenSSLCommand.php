@@ -28,10 +28,10 @@ class CheckOpenSSLCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $keyLoader = $this->getContainer()->get('lexik_jwt_authentication.openssl_key_loader');
+        $keyLoader = $this->getContainer()->get('lexik_jwt_authentication.key_loader.open_ssl');
 
         try {
-            $keyLoader->checkOpenSSLConfig();
+            $keyLoader->checkConfig();
         } catch (\RuntimeException $e) {
             $output->writeln('<error>' . $e->getMessage() . '</error>');
             return 1;

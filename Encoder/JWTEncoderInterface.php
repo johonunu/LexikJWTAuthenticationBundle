@@ -22,4 +22,14 @@ interface JWTEncoderInterface
      * @return bool|array
      */
     public function decode($token);
+
+    /**
+     * @return string
+     */
+    public function getEncryptionEngine();
+
+    /**
+     * @return string
+     */
+    public function getEncryptionAlgorithm();
 }

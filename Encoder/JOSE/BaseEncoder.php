@@ -136,4 +136,20 @@ class BaseEncoder implements JWTEncoderInterface
 
         return false;
     }
+
+    /**
+     * @return string
+     */
+    public function getEncryptionEngine()
+    {
+        return $this->encryptionEngine;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncryptionAlgorithm()
+    {
+        return $this->encryptionAlgorithm;
+    }
 }

@@ -12,6 +12,8 @@
         <parameter key="lexik_jwt_authentication.handler.authentication_failure.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationFailureHandler</parameter>
         <parameter key="lexik_jwt_authentication.key_loader.open_ssl.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\OpenSSLKeyLoader</parameter>
         <parameter key="lexik_jwt_authentication.key_loader.sec_lib.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\SecLibKeyLoader</parameter>
+        <parameter key="lexik_jwt_authentication.key_generator.open_ssl.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyGenerator\OpenSSLKeyGenerator</parameter>
+        <parameter key="lexik_jwt_authentication.key_generator.sec_lib.class">Lexik\Bundle\JWTAuthenticationBundle\Services\KeyGenerator\SecLibKeyGenerator</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.provider.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Authentication\Provider\JWTProvider</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.listener.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Firewall\JWTListener</parameter>
         <parameter key="lexik_jwt_authentication.security.authentication.entry_point.class">Lexik\Bundle\JWTAuthenticationBundle\Security\Http\EntryPoint\JWTEntryPoint</parameter>
@@ -58,6 +60,18 @@
         </service>
         <!-- SecLib Key Loader -->
         <service id="lexik_jwt_authentication.key_loader.sec_lib" class="%lexik_jwt_authentication.key_loader.sec_lib.class%">
+            <argument>%lexik_jwt_authentication.private_key_path%</argument>
+            <argument>%lexik_jwt_authentication.public_key_path%</argument>
+            <argument>%lexik_jwt_authentication.pass_phrase%</argument>
+        </service>
+        <!-- OpenSSL Key Generator -->
+        <service id="lexik_jwt_authentication.key_generator.open_ssl" class="%lexik_jwt_authentication.key_generator.open_ssl.class%">
+            <argument>%lexik_jwt_authentication.private_key_path%</argument>
+            <argument>%lexik_jwt_authentication.public_key_path%</argument>
+            <argument>%lexik_jwt_authentication.pass_phrase%</argument>
+        </service>
+        <!-- SecLib Key Generator -->
+        <service id="lexik_jwt_authentication.key_generator.sec_lib" class="%lexik_jwt_authentication.key_generator.sec_lib.class%">
             <argument>%lexik_jwt_authentication.private_key_path%</argument>
             <argument>%lexik_jwt_authentication.public_key_path%</argument>
             <argument>%lexik_jwt_authentication.pass_phrase%</argument>

@@ -28,7 +28,8 @@ final class LoadedJWSTest extends \PHPUnit_Framework_TestCase
         $jws = new LoadedJWS($payload = [], true);
 
         $this->assertSame($payload, $jws->getPayload());
-        $this->assertFalse($jws->isVerified());
+        $this->assertTrue($jws->isVerified());
+        $this->assertFalse($jws->isInvalid());
         $this->assertFalse($jws->isExpired());
     }
 
@@ -39,6 +40,7 @@ final class LoadedJWSTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->goodPayload, $jws->getPayload());
         $this->assertFalse($jws->isExpired());
         $this->assertFalse($jws->isVerified());
+        $this->assertFalse($jws->isInvalid());
     }
 
     public function testVerifiedWithGoodPayload()
@@ -48,6 +50,7 @@ final class LoadedJWSTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->goodPayload, $jws->getPayload());
         $this->assertFalse($jws->isExpired());
         $this->assertTrue($jws->isVerified());
+        $this->assertFalse($jws->isInvalid());
     }
 
     public function testVerifiedWithExpiredPayload()
@@ -59,6 +62,7 @@ final class LoadedJWSTest extends \PHPUnit_Framework_TestCase
 
         $this->assertFalse($jws->isVerified());
         $this->assertTrue($jws->isExpired());
+        $this->assertFalse($jws->isInvalid());
     }
 
     public function testIsInvalidReturnsTrueWithIssuedAtSetInTheFuture()

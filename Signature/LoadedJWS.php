@@ -79,7 +79,11 @@ final class LoadedJWS
      */
     private function checkExpiration()
     {
-        if (!isset($this->payload['exp']) || !is_numeric($this->payload['exp'])) {
+        if (!isset($this->payload['exp'])) {
+            return;
+        }
+
+        if (!is_numeric($this->payload['exp'])) {
             return $this->state = self::INVALID;
         }
 

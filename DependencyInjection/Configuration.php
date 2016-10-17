@@ -44,7 +44,7 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(3600)
                     ->validate()
                         ->ifTrue(function ($ttl) {
-                            return !is_numeric($ttl);
+                            return null !== $ttl && !is_numeric($ttl);
                         })
                         ->thenInvalid('The token_ttl must be a numeric value.')
                     ->end()

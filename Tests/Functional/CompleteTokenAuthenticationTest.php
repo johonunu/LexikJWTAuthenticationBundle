@@ -61,7 +61,7 @@ class CompleteTokenAuthenticationTest extends TestCase
         static::bootKernel();
 
         $encoder = static::$kernel->getContainer()->get('lexik_jwt_authentication.encoder');
-        $payload = ['exp' => time()];
+        $payload = ['username' => 'lexik', 'exp' => time()];
 
         static::$client = static::createAuthenticatedClient($encoder->encode($payload));
         static::accessSecuredRoute();

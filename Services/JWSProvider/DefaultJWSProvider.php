@@ -68,7 +68,11 @@ class DefaultJWSProvider implements JWSProviderInterface
     {
         $jws = new JWS(['alg' => $this->signatureAlgorithm], $this->cryptoEngine);
 
-        $jws->setPayload($payload + ['exp' => (time() + $this->ttl), 'iat' => time()]);
+        if (is_numeric($this->ttl) && !isset($payload['exp'])) {
+            $payload['exp'] = time() + $this->ttl;
+        }
+
+        $jws->setPayload($payload + ['iat' => time()]);
         $jws->sign(
             $this->keyLoader->loadKey('private'),
             $this->keyLoader->getPassphrase()

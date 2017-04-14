@@ -26,13 +26,25 @@ class LexikJWTAuthenticationExtension extends Extension
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.xml');
 
-        $container->setParameter('lexik_jwt_authentication.private_key_path', $config['private_key_path']);
-        $container->setParameter('lexik_jwt_authentication.public_key_path', $config['public_key_path']);
-        $container->setParameter('lexik_jwt_authentication.pass_phrase', $config['pass_phrase']);
         $container->setParameter('lexik_jwt_authentication.token_ttl', $config['token_ttl']);
         $container->setParameter('lexik_jwt_authentication.user_identity_field', $config['user_identity_field']);
 
+        $container
+            ->getDefinition('lexik_jwt_authentication.key_loader.abstract')
+            ->replaceArgument(0, $config['private_key_path'])
+            ->replaceArgument(1, $config['public_key_path'])
+            ->replaceArgument(2, $config['pass_phrase'])
+        ;
+
         $encoderConfig = $config['encoder'];
+
+        $container
+            ->getDefinition('lexik_jwt_authentication.jws_provider.abstract')
+            ->replaceArgument(1, $encoderConfig['crypto_engine'])
+            ->replaceArgument(2, $encoderConfig['signature_algorithm'])
+        ;
+
+
         $container->setAlias('lexik_jwt_authentication.encoder', $encoderConfig['service']);
         $container->setAlias(
             'lexik_jwt_authentication.key_loader',

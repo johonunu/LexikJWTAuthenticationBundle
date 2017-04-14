@@ -24,7 +24,10 @@ class LexikJWTAuthenticationExtensionTest extends TestCase
 
     protected function setUp()
     {
+        putenv('JWT_TTL=30');
         static::bootKernel();
+
+        var_dump(static::$kernel->getContainer()->get('lexik_jwt_authentication.jws_provider.default'));
         self::$resourceDir = sys_get_temp_dir().'/LexikJWTAuthenticationBundle/';
 
         if (!is_dir(self::$resourceDir)) {

@@ -29,4 +29,8 @@
         </whitelist>
     </filter>
 
+    <php>
+        <env name="JWT_TTL" value="30"/>
+    </php>
+
 </phpunit>

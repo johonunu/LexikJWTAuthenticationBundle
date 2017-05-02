@@ -12,12 +12,13 @@ matrix:
     - php: 7.0
       env: SYMFONY_VERSION=3.3.* DEPENDENCIES=dev
     - php: 7.1
-    - php: hhvm-stable
+    - php: hhvm-3.18
       sudo: required
       dist: trusty
       group: edge
+
   allow_failures:
-    - php: hhvm-stable
+    - php: hhvm-3.18
 
 cache:
   directories:

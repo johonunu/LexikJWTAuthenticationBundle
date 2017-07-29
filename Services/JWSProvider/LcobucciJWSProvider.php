@@ -5,7 +5,9 @@ namespace Lexik\Bundle\JWTAuthenticationBundle\Services\JWSProvider;
 use Lcobucci\JWT\Builder;
 use Lcobucci\JWT\Parser;
 use Lcobucci\JWT\Signer;
+use Lcobucci\JWT\Signer\Hmac;
 use Lcobucci\JWT\Signer\Key;
+use Lcobucci\JWT\Token;
 use Lcobucci\JWT\ValidationData;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader\RawKeyLoader;
 use Lexik\Bundle\JWTAuthenticationBundle\Signature\CreatedJWS;
@@ -75,14 +77,12 @@ class LcobucciJWSProvider implements JWSProviderInterface
             $jws->set($name, $value);
         }
 
+        $signed = false;
+
         try {
-            $jws->sign(
-                $this->signer,
-                new Key($this->keyLoader->loadKey('private'), $this->keyLoader->getPassphrase())
-            );
+            $this->sign($jws);
             $signed = true;
         } catch (\InvalidArgumentException $e) {
-            $signed = false;
         }
 
         return new CreatedJWS((string) $jws->getToken(), $signed);
@@ -100,12 +100,7 @@ class LcobucciJWSProvider implements JWSProviderInterface
             $payload[$claim->getName()] = $claim->getValue();
         }
 
-        return new LoadedJWS(
-            $payload,
-            $jws->verify($this->signer, $this->keyLoader->loadKey('public')) && $jws->validate(new ValidationData()),
-            null !== $this->ttl,
-            $jws->getHeaders()
-        );
+        return new LoadedJWS($payload, $this->verify($jws), null !== $this->ttl, $jws->getHeaders());
     }
 
     private function getSignerForAlgorithm($signatureAlgorithm)
@@ -128,5 +123,28 @@ class LcobucciJWSProvider implements JWSProviderInterface
         $signer = sprintf('Lcobucci\\JWT\\Signer\\%s\\Sha%s', $signerType, $bits);
 
         return new $signer();
+    }
+
+    private function sign(Builder $jws)
+    {
+        if ($this->signer instanceof Hmac) {
+            return $jws->sign($this->signer, $this->keyLoader->getPassphrase());
+        }
+
+        return $jws->sign(
+            $this->signer,
+            new Key($this->keyLoader->loadKey('private'), $this->keyLoader->getPassphrase())
+        );
+    }
+
+    private function verify(Token $jwt)
+    {
+        $valid = $jwt->validate(new ValidationData());
+
+        if ($this->signer instanceof Hmac) {
+            return $jwt->verify($this->signer, $this->keyLoader->getPassphrase()) && $valid;
+        }
+
+        return $jwt->verify($this->signer, $this->keyLoader->loadKey('public')) && $valid;
     }
 }

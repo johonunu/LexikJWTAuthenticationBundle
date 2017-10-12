@@ -24,12 +24,9 @@ abstract class AbstractTestKeyLoader extends TestCase
     }
 
     /**
-     * Test load unreadable public key.
-     *
-     * @expectedException        \RuntimeException
-     * @expectedExceptionMessage Public key "public.pem" does not exist or is not readable.
+     * Test load public key.
      */
-    public function testLoadUnreadablePublicKey()
+    public function testLoadPublicKey()
     {
         $this->keyLoader->loadKey('public');
     }

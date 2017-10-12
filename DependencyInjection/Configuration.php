@@ -25,12 +25,19 @@ class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('private_key_path')
+                    // TODO deprecate in favor of `secret_key` - default to `%kernel.secret%` ONLY WHEN USING HMAC (required otherwise) -  plaintext (PEM/secret) or file path)
                     ->defaultNull()
                 ->end()
                 ->scalarNode('public_key_path')
+                    // TODO deprecate in favor of `public_key` - optional, plaintext (PEM) or file path - useless with HMAC
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('signature_key')
+                    ->info('The key used to sign tokens. It can be a plaintext secret (for HMAC), a RSA/ECDSA key or the path to a file itself being plaintext or PEM.')
                     ->defaultNull()
                 ->end()
                 ->scalarNode('pass_phrase')
+                    // TODO info() => useless with HMAC
                     ->defaultValue('')
                 ->end()
                 ->scalarNode('token_ttl')
@@ -49,6 +56,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                         ->end()
                         ->scalarNode('signature_algorithm')
+                            // TODO => deprecate relying on the default value, trigger before normalization -
                             ->defaultValue('RS256')
                             ->cannotBeEmpty()
                         ->end()

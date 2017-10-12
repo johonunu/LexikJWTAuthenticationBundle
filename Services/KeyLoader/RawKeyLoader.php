@@ -18,7 +18,11 @@ class RawKeyLoader extends AbstractKeyLoader implements KeyDumperInterface
      */
     public function loadKey($type)
     {
-        return file_get_contents($this->getKeyPath($type));
+        if (self::TYPE_PUBLIC === $type) {
+            return $this->dumpKey();
+        }
+
+        return $this->getSigningKey();
     }
 
     /**
@@ -26,6 +30,21 @@ class RawKeyLoader extends AbstractKeyLoader implements KeyDumperInterface
      */
     public function dumpKey()
     {
-        return $this->loadKey('public');
+        if ($publicKey = $this->getPublicKey()) {
+            return $publicKey;
+        }
+
+        $signingKey = $this->getSigningKey();
+
+        // no public key provided, compute it from signing key
+        try {
+            $publicKey  = openssl_pkey_get_details(openssl_pkey_get_private($signingKey, $this->getPassphrase()))['key'];
+        } catch (\Throwable $e) {
+            throw new \RuntimeException(
+                sprintf('Signing key "%s" either does not exist, is not readable or is invalid. Did you correctly set the "lexik_jwt_authentication.jwt_private_key_path" config option?', $path)
+            );
+        }
+
+        return $publicKey;
     }
 }

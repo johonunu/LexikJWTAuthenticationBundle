@@ -52,7 +52,18 @@ class LexikJWTAuthenticationExtension extends Extension
             $container->removeDefinition('lexik_jwt_authentication.jws_provider.lcobucci');
         }
 
-        $container->setParameter('lexik_jwt_authentication.private_key_path', $config['private_key_path']);
+        $signatureKey = $config['signature_key'];
+
+        if (isset($config['private_key_path'])) {
+            $signatureKey = $config['private_key_path'];
+            @trigger_error('The "lexik_jwt_authentication.private_key_path" configuration key is deprecated since version 2.5 and will be removed in 3.0. Use "lexik_jwt_authentication.signature_key" instead.', E_USER_DEPRECATED);
+        }
+
+        if (isset($config['public_key_path'])) {
+            @trigger_error('The "lexik_jwt_authentication.public_key_path" configuration key is deprecated since version 2.5 and will be removed in 3.0. Just set the "lexik_jwt_authentication.signature_key" using the path of your private key instead, the bundle is in charge of computing the public key when needed.', E_USER_DEPRECATED);
+        }
+
+        $container->setParameter('lexik_jwt_authentication.private_key_path', $signatureKey);
         $container->setParameter('lexik_jwt_authentication.public_key_path', $config['public_key_path']);
         $container->setParameter('lexik_jwt_authentication.pass_phrase', $config['pass_phrase']);
         $container->setParameter('lexik_jwt_authentication.token_ttl', $config['token_ttl']);

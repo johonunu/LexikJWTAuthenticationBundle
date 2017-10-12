@@ -105,46 +105,51 @@ class LcobucciJWSProvider implements JWSProviderInterface
 
     private function getSignerForAlgorithm($signatureAlgorithm)
     {
-        if (0 === strpos($signatureAlgorithm, 'HS')) {
-            $signerType = 'Hmac';
-        } elseif (0 === strpos($signatureAlgorithm, 'RS')) {
-            $signerType = 'Rsa';
-        } elseif (0 === strpos($signatureAlgorithm, 'EC')) {
-            $signerType = 'Ecdsa';
-        }
+        $signerMap = [
+            'HS256' => Signer\Hmac\Sha256::class,
+            'HS384' => Signer\Hmac\Sha384::class,
+            'HS512' => Signer\Hmac\Sha512::class,
+            'RS256' => Signer\Rsa\Sha256::class,
+            'RS384' => Signer\Rsa\Sha384::class,
+            'RS512' => Signer\Rsa\Sha512::class,
+            'EC256' => Signer\Ecdsa\Sha256::class,
+            'EC384' => Signer\Ecdsa\Sha384::class,
+            'EC512' => Signer\Ecdsa\Sha512::class,
+        ];
 
-        if (!isset($signerType)) {
+        if (!isset($signerMap[$signatureAlgorithm])) {
             throw new \InvalidArgumentException(
                 sprintf('The algorithm "%s" is not supported by %s', $signatureAlgorithm, __CLASS__)
             );
         }
 
-        $bits   = substr($signatureAlgorithm, 2, strlen($signatureAlgorithm));
-        $signer = sprintf('Lcobucci\\JWT\\Signer\\%s\\Sha%s', $signerType, $bits);
+        $signerClass = $signerMap[$signatureAlgorithm];
 
-        return new $signer();
+        return new $signerClass();
     }
 
     private function sign(Builder $jws)
     {
         if ($this->signer instanceof Hmac) {
-            return $jws->sign($this->signer, $this->keyLoader->getPassphrase());
+            return $jws->sign($this->signer, $this->keyLoader->loadKey(RawKeyLoader::TYPE_PRIVATE));
         }
 
         return $jws->sign(
             $this->signer,
-            new Key($this->keyLoader->loadKey('private'), $this->keyLoader->getPassphrase())
+            new Key($this->keyLoader->loadKey(RawKeyLoader::TYPE_PRIVATE), $this->keyLoader->getPassphrase())
         );
     }
 
     private function verify(Token $jwt)
     {
-        $valid = $jwt->validate(new ValidationData());
-
-        if ($this->signer instanceof Hmac) {
-            return $jwt->verify($this->signer, $this->keyLoader->getPassphrase()) && $valid;
+        if (!$jwt->validate(new ValidationData())) {
+            return false;
         }
 
-        return $jwt->verify($this->signer, $this->keyLoader->loadKey('public')) && $valid;
+        if ($this->signer instanceof Hmac) {
+            return $jwt->verify($this->signer, $this->keyLoader->loadKey(RawKeyLoader::TYPE_PRIVATE));
+        }
+
+        return $jwt->verify($this->signer, $this->keyLoader->loadKey(RawKeyLoader::TYPE_PUBLIC));
     }
 }

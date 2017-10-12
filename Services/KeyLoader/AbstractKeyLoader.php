@@ -6,34 +6,34 @@ namespace Lexik\Bundle\JWTAuthenticationBundle\Services\KeyLoader;
  * Abstract class for key loaders.
  *
  * @author Robin Chalas <robin.chalas@gmail.com>
+ *
+ * @internal since version 2.5
  */
 abstract class AbstractKeyLoader implements KeyLoaderInterface
 {
     /**
      * @var string
      */
-    private $privateKey;
+    private $signingKey;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $publicKey;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $passphrase;
 
     /**
-     * Constructor.
-     *
-     * @param string $privateKey
-     * @param string $publicKey
-     * @param string $passphrase
+     * @param string      $signingKey
+     * @param string|null $publicKey
+     * @param string|null $passphrase
      */
-    public function __construct($privateKey, $publicKey, $passphrase)
+    public function __construct($signingKey, $publicKey = null, $passphrase = null)
     {
-        $this->privateKey = $privateKey;
+        $this->signingKey = $signingKey;
         $this->publicKey  = $publicKey;
         $this->passphrase = $passphrase;
     }
@@ -47,9 +47,25 @@ abstract class AbstractKeyLoader implements KeyLoaderInterface
     }
 
     /**
+     * @return string The raw signing key
+     */
+    protected function getSigningKey()
+    {
+        return is_file($this->signingKey) ? $this->readKey(self::TYPE_PRIVATE) : $this->signingKey;
+    }
+
+    /**
+     * @return string The raw public key
+     */
+    protected function getPublicKey()
+    {
+        return is_file($this->publicKey) ? $this->readKey(self::TYPE_PUBLIC) : $this->publicKey;
+    }
+
+    /**
      * @param string $type One of "public" or "private"
      *
-     * @return string The path of the key
+     * @return string The path of the key, an empty string if not a valid path
      *
      * @throws \InvalidArgumentException If the given type is not valid
      */
@@ -59,15 +75,7 @@ abstract class AbstractKeyLoader implements KeyLoaderInterface
             throw new \InvalidArgumentException(sprintf('The key type must be "public" or "private", "%s" given.', $type));
         }
 
-        $path = null;
-
-        if (self::TYPE_PUBLIC === $type) {
-            $path = $this->publicKey;
-        }
-
-        if (self::TYPE_PRIVATE === $type) {
-            $path = $this->privateKey;
-        }
+        $path = $this->signingKey;
 
         if (!is_file($path) || !is_readable($path)) {
             throw new \RuntimeException(
@@ -76,5 +84,21 @@ abstract class AbstractKeyLoader implements KeyLoaderInterface
         }
 
         return $path;
+    }
+
+    private function readKey($type)
+    {
+        $isPublic = self::TYPE_PUBLIC === $type;
+        $key = $isPublic ? $this->publicKey : $this->signingKey;
+
+        if (!$key || !is_file($key) || !is_readable($key)) {
+            if ($isPublic) {
+                return null;
+            }
+
+            throw new \RuntimeException(
+                sprintf('Signature key "%s" does not exist or is not readable. Did you correctly set the "lexik_jwt_authentication.signature_key" configuration key?', $key, $type)
+            );
+        }
     }
 }

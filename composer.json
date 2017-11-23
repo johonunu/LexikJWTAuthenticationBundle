@@ -49,7 +49,8 @@
         "symfony/dom-crawler": "^2.8|^3.0|^4.0",
         "symfony/yaml": "^2.8|^3.0|^4.0",
         "friendsofphp/php-cs-fixer": "^1.1|^2.8@dev",
-        "lcobucci/jwt": "~3.2"
+        "lcobucci/jwt": "~3.2",
+        "auth0/auth0-php": "^5.0"
     },
     "suggest": {
         "gesdinet/jwt-refresh-token-bundle": "Implements a refresh token system over Json Web Tokens in Symfony",

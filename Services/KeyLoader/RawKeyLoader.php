@@ -18,6 +18,10 @@ class RawKeyLoader extends AbstractKeyLoader implements KeyDumperInterface
      */
     public function loadKey($type)
     {
+        if (!in_array($type, [self::TYPE_PUBLIC, self::TYPE_PRIVATE])) {
+            throw new \InvalidArgumentException(sprintf('The key type must be "public" or "private", "%s" given.', $type));
+        }
+
         if (self::TYPE_PUBLIC === $type) {
             return $this->dumpKey();
         }
